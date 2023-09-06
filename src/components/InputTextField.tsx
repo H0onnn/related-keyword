@@ -4,15 +4,17 @@ import { colors } from '../constants/colors';
 interface InputTextFieldProps {
   onFocus: () => void;
   onBlur: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const InputTextField = ({ onFocus, onBlur }: InputTextFieldProps) => {
+const InputTextField = ({ onFocus, onBlur, onChange }: InputTextFieldProps) => {
   return (
     <StyledInput
       placeholder="질환명을 입력해 주세요."
       type="text"
       onFocus={onFocus}
       onBlur={onBlur}
+      onChange={onChange}
     />
   );
 };
