@@ -10,4 +10,5 @@ export const MainPageLayout = styled.div`
   width: 100%;
   background-color: ${colors.primary};
   padding: 80px 0 160px;
+  margin-top: 60px;
 `;
