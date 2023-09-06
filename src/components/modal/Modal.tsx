@@ -3,12 +3,12 @@ import { getKeywordData } from '../../api/data';
 import { KeywordDataTypes } from '../../constants/types';
 import { styled } from 'styled-components';
 import { colors } from '../../constants/colors';
-import { KeywordData } from '../../constants/types';
+import { KeywordQueryData } from '../../constants/types';
 import KeywordList from './KeywordList';
 import useDebounce from '../../hooks/useDebounce';
 import localCache from '../../utils/localCache';
 
-const Modal = ({ query }: KeywordData, useCache: boolean) => {
+const Modal = ({ query }: KeywordQueryData, useCache: boolean) => {
   const [keywordData, setKeywordData] = useState<KeywordDataTypes[]>([]);
   const debouncedValue = useDebounce(query, DELAY_TIME);
 
