@@ -6,7 +6,8 @@ export const MainPageLayout = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  height: 462px;
+  height: 100%;
   width: 100%;
   background-color: ${colors.primary};
+  padding: 80px 0 160px;
 `;
