@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const axiosBase = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: 'https://preonboardingapiserver.vercel.app/api/data',
   headers: {
     'Content-Type': 'application/json',
   },
