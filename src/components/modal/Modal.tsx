@@ -103,13 +103,14 @@ export default Modal;
 const DELAY_TIME = 400;
 
 const ModalContainer = styled.div<{ show: boolean }>`
-  display: ${props => (props.show ? 'block' : 'none')};
+  display: ${props => (props.show ? 'flex' : 'none')};
+  flex-direction: column;
   position: absolute;
   top: calc(100% + 10px);
   width: 490px;
   max-height: 300px;
   background-color: ${colors.white};
-  border-radius: 5px;
+  border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
   padding: 20px;
@@ -117,16 +118,7 @@ const ModalContainer = styled.div<{ show: boolean }>`
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 7px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: ${colors.grey};
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-track {
-    border-radius: 10px;
+    display: none;
   }
 `;
 
