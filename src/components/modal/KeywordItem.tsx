@@ -1,7 +1,7 @@
 import React from 'react';
 import { KeywordQueryData } from '../../constants/types';
 import styled from 'styled-components';
-import InputImage from '../InputImage';
+import InputImage from '../input/InputImage';
 import { colors } from '../../constants/colors';
 
 interface KeywordItemProps extends KeywordQueryData {

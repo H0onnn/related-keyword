@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { styled } from 'styled-components';
-import { colors } from '../constants/colors';
+import { colors } from '../../constants/colors';
 import InputButton from './InputButton';
 import InputImage from './InputImage';
 import InputTextField from './InputTextField';
-import Modal from './modal/Modal';
+import Modal from '../modal/Modal';
 interface InputContainerProps {
   isFocused: boolean;
 }
