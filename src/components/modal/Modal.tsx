@@ -8,6 +8,7 @@ import KeywordList from './KeywordList';
 import useDebounce from '../../hooks/useDebounce';
 import localCache from '../../utils/localCache';
 import useKeyPress from '../../hooks/useKeyPress';
+import LoadingUI from '../UI/LoadingUI';
 
 interface ModalProps extends KeywordQueryData {
   useCache: boolean;
@@ -18,6 +19,8 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   const [keywordData, setKeywordData] = useState<KeywordDataTypes[]>([]);
   const debouncedValue = useDebounce(query, DELAY_TIME);
   const [currentItem, setCurrentItem] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const modalRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<HTMLDivElement[]>([]);
 
@@ -27,6 +30,7 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
 
   const fetchKeywordData = useCallback(async () => {
     if (debouncedValue && debouncedValue.length) {
+      setIsLoading(true);
       let data = useCache ? localCache.readFromCache(debouncedValue) : null;
 
       if (!data || !data.length) {
@@ -35,6 +39,7 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
       }
 
       setKeywordData(data);
+      setIsLoading(false);
     }
   }, [debouncedValue, useCache]);
 
@@ -51,8 +56,12 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   };
 
   useEffect(() => {
-    fetchKeywordData();
-  }, [fetchKeywordData]);
+    if (debouncedValue) {
+      fetchKeywordData();
+    } else {
+      setKeywordData([]);
+    }
+  }, [debouncedValue]);
 
   useEffect(() => {
     if (keywordData.length && downPressed) {
@@ -88,12 +97,19 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   }, [downPressed, upPressed, keywordData, currentItem]);
 
   return (
-    <ModalContainer show={query.trim().length > 0} ref={modalRef}>
+    <ModalContainer show={debouncedValue.trim().length > 0} ref={modalRef}>
       <CommentBox>
         <ModalComment>추천 검색어</ModalComment>
       </CommentBox>
-      <KeywordList queries={keywordData} selectedItem={currentItem} refs={itemRefs} />
-      <NoDataCommentBox>{!keywordData.length && <span>검색어 없음</span>}</NoDataCommentBox>
+
+      {isLoading ? (
+        <LoadingUI />
+      ) : (
+        <>
+          <KeywordList queries={keywordData} selectedItem={currentItem} refs={itemRefs} />
+          <NoDataCommentBox>{!keywordData.length && <span>검색어 없음</span>}</NoDataCommentBox>
+        </>
+      )}
     </ModalContainer>
   );
 };
