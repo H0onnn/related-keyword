@@ -1,25 +1,33 @@
-import { KeywordData } from '../../constants/types';
-import { styled } from 'styled-components';
+import React from 'react';
+import { KeywordQueryData } from '../../constants/types';
+import styled from 'styled-components';
 import InputImage from '../InputImage';
 import { colors } from '../../constants/colors';
 
-const KeywordItem = ({ query }: KeywordData) => {
-  return (
-    <KeywordItemContainer>
-      <InputImage />
-      <span>{query}</span>
-    </KeywordItemContainer>
-  );
-};
+interface KeywordItemProps extends KeywordQueryData {
+  isSelected?: boolean;
+}
+
+const KeywordItem = React.forwardRef<HTMLDivElement, KeywordItemProps>(
+  ({ query, isSelected }, ref) => {
+    return (
+      <KeywordItemContainer ref={ref} isSelected={isSelected}>
+        <InputImage />
+        <span>{query}</span>
+      </KeywordItemContainer>
+    );
+  },
+);
 
 export default KeywordItem;
 
-const KeywordItemContainer = styled.div`
+const KeywordItemContainer = styled.div<{ isSelected?: boolean }>`
   display: flex;
   gap: 10px;
   width: 100%;
   height: 45px;
   align-items: center;
+  background-color: ${props => (props.isSelected ? colors.grey : colors.white)};
 
   &:hover {
     background-color: ${colors.grey};
