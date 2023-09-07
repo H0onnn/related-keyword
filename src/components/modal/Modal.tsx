@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getKeywordData } from '../../api/data';
 import { KeywordDataTypes } from '../../constants/types';
 import { styled } from 'styled-components';
@@ -7,34 +7,92 @@ import { KeywordQueryData } from '../../constants/types';
 import KeywordList from './KeywordList';
 import useDebounce from '../../hooks/useDebounce';
 import localCache from '../../utils/localCache';
+import useKeyPress from '../../hooks/useKeyPress';
 
-const Modal = ({ query }: KeywordQueryData, useCache: boolean) => {
+interface ModalProps extends KeywordQueryData {
+  useCache: boolean;
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   const [keywordData, setKeywordData] = useState<KeywordDataTypes[]>([]);
   const debouncedValue = useDebounce(query, DELAY_TIME);
+  const [currentItem, setCurrentItem] = useState<number>(0);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<HTMLDivElement[]>([]);
+
+  const downPressed = useKeyPress('ArrowDown');
+  const upPressed = useKeyPress('ArrowUp');
+  const enterPressed = useKeyPress('Enter');
+
+  const fetchKeywordData = useCallback(async () => {
+    if (debouncedValue && debouncedValue.length) {
+      let data = useCache ? localCache.readFromCache(debouncedValue) : null;
+
+      if (!data || !data.length) {
+        console.info('calling api');
+        data = await getKeywordData(debouncedValue, useCache);
+      }
+
+      setKeywordData(data);
+    }
+  }, [debouncedValue, useCache]);
+
+  const adjustScroll = () => {
+    const container = modalRef.current;
+    const selectedItem = itemRefs.current[currentItem];
+
+    if (container && selectedItem) {
+      const topPos = selectedItem.offsetTop;
+      const itemHeight = selectedItem.offsetHeight;
+
+      container.scrollTop = topPos - container.offsetHeight / 2 + itemHeight / 2;
+    }
+  };
 
   useEffect(() => {
-    if (debouncedValue && debouncedValue.length) {
-      const fetchKeywordData = async () => {
-        let data = useCache ? localCache.readFromCache(debouncedValue) : null;
+    fetchKeywordData();
+  }, [fetchKeywordData]);
 
-        if (!data || !data.length) {
-          console.info('calling api');
-          data = await getKeywordData(debouncedValue, useCache);
-        }
-
-        setKeywordData(data);
-      };
-
-      fetchKeywordData();
+  useEffect(() => {
+    if (keywordData.length && downPressed) {
+      const nextItem = (currentItem + 1) % keywordData.length;
+      if (nextItem !== currentItem) {
+        setCurrentItem(nextItem);
+      }
     }
-  }, [debouncedValue]);
+  }, [downPressed]);
+
+  useEffect(() => {
+    if (keywordData.length && upPressed) {
+      const prevItem = (currentItem - 1 + keywordData.length) % keywordData.length;
+      if (prevItem !== currentItem) {
+        setCurrentItem(prevItem);
+      }
+    }
+  }, [upPressed]);
+
+  useEffect(() => {
+    if (keywordData.length && enterPressed) {
+      const selectedKeyword = keywordData[currentItem]?.sickNm;
+
+      if (selectedKeyword) setQuery(selectedKeyword);
+      else setQuery(query);
+    }
+  }, [enterPressed]);
+
+  useEffect(() => {
+    if (keywordData.length && (downPressed || upPressed)) {
+      adjustScroll();
+    }
+  }, [downPressed, upPressed, keywordData, currentItem]);
 
   return (
-    <ModalContainer>
+    <ModalContainer show={query.trim().length > 0} ref={modalRef}>
       <CommentBox>
         <ModalComment>추천 검색어</ModalComment>
       </CommentBox>
-      <KeywordList queries={keywordData} />
+      <KeywordList queries={keywordData} selectedItem={currentItem} refs={itemRefs} />
       <NoDataCommentBox>{!keywordData.length && <span>검색어 없음</span>}</NoDataCommentBox>
     </ModalContainer>
   );
@@ -42,13 +100,14 @@ const Modal = ({ query }: KeywordQueryData, useCache: boolean) => {
 
 export default Modal;
 
-const DELAY_TIME = 500;
+const DELAY_TIME = 400;
 
-const ModalContainer = styled.div`
+const ModalContainer = styled.div<{ show: boolean }>`
+  display: ${props => (props.show ? 'block' : 'none')};
   position: absolute;
   top: calc(100% + 10px);
   width: 490px;
-  height: 300px;
+  max-height: 300px;
   background-color: ${colors.white};
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
