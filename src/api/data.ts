@@ -13,7 +13,3 @@ export const getKeywordData = async (
 
   return data;
 };
-
-export const getCachedKeywordData = (query: string): KeywordDataTypes[] => {
-  return localCache.readFromCache(query);
-};
