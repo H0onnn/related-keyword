@@ -23,10 +23,14 @@ const Input: React.FC = () => {
       <InputTextField
         onChange={handleInputValueChange}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onBlur={() => {
+          setIsFocused(false);
+          setQuery('');
+        }}
+        query={query}
       />
       <InputButton />
-      {isFocused && <Modal query={query} useCache={true} />}
+      {isFocused && <Modal query={query} setQuery={setQuery} useCache={true} />}
     </InputContainer>
   );
 };
