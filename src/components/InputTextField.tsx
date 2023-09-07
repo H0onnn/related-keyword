@@ -5,9 +5,10 @@ interface InputTextFieldProps {
   onFocus: () => void;
   onBlur: () => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  query: string;
 }
 
-const InputTextField = ({ onFocus, onBlur, onChange }: InputTextFieldProps) => {
+const InputTextField = ({ onFocus, onBlur, onChange, query }: InputTextFieldProps) => {
   return (
     <StyledInput
       placeholder="질환명을 입력해 주세요."
@@ -15,6 +16,7 @@ const InputTextField = ({ onFocus, onBlur, onChange }: InputTextFieldProps) => {
       onFocus={onFocus}
       onBlur={onBlur}
       onChange={onChange}
+      value={query}
     />
   );
 };
