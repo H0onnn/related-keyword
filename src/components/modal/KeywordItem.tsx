@@ -28,6 +28,7 @@ const KeywordItemContainer = styled.div<{ isSelected?: boolean }>`
   height: 45px;
   align-items: center;
   background-color: ${props => (props.isSelected ? colors.grey : colors.white)};
+  border-radius: 10px;
 
   &:hover {
     background-color: ${colors.grey};
