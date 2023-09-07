@@ -1,5 +1,6 @@
 import KeywordItem from './KeywordItem';
 import { KeywordDataTypes } from '../../constants/types';
+import { styled } from 'styled-components';
 
 interface KeywordListProps {
   queries: KeywordDataTypes[];
@@ -9,7 +10,7 @@ interface KeywordListProps {
 
 const KeywordList = ({ queries, selectedItem, refs }: KeywordListProps) => {
   return (
-    <div>
+    <KeywordListContainer>
       {queries.map((query, index) => (
         <KeywordItem
           key={query.sickCd}
@@ -20,8 +21,12 @@ const KeywordList = ({ queries, selectedItem, refs }: KeywordListProps) => {
           }}
         />
       ))}
-    </div>
+    </KeywordListContainer>
   );
 };
 
 export default KeywordList;
+
+const KeywordListContainer = styled.div`
+  flex: 1;
+`;
