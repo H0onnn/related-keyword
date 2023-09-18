@@ -15,7 +15,7 @@ const KeywordList = ({ queries, selectedItem, refs }: KeywordListProps) => {
         <KeywordItem
           key={query.sickCd}
           query={query.sickNm}
-          isSelected={index === selectedItem}
+          $isSelected={index === selectedItem}
           ref={el => {
             if (el) refs.current[index] = el;
           }}

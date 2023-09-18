@@ -5,13 +5,13 @@ import InputImage from '../input/InputImage';
 import { colors } from '../../constants/colors';
 
 interface KeywordItemProps extends KeywordQueryData {
-  isSelected?: boolean;
+  $isSelected?: boolean;
 }
 
 const KeywordItem = React.forwardRef<HTMLDivElement, KeywordItemProps>(
-  ({ query, isSelected }, ref) => {
+  ({ query, $isSelected }, ref) => {
     return (
-      <KeywordItemContainer ref={ref} isSelected={isSelected}>
+      <KeywordItemContainer ref={ref} $isSelected={$isSelected}>
         <InputImage />
         <span>{query}</span>
       </KeywordItemContainer>
@@ -21,13 +21,13 @@ const KeywordItem = React.forwardRef<HTMLDivElement, KeywordItemProps>(
 
 export default KeywordItem;
 
-const KeywordItemContainer = styled.div<{ isSelected?: boolean }>`
+const KeywordItemContainer = styled.div<{ $isSelected?: boolean }>`
   display: flex;
   gap: 10px;
   width: 100%;
   height: 45px;
   align-items: center;
-  background-color: ${props => (props.isSelected ? colors.grey : colors.white)};
+  background-color: ${props => (props.$isSelected ? colors.grey : colors.white)};
   border-radius: 10px;
 
   &:hover {
