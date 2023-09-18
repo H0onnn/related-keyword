@@ -3,15 +3,17 @@ import { KeywordDataTypes } from '../constants/types';
 const cacheVersion = 'v1';
 const cacheName = `sick-cache-${cacheVersion}`;
 
-const localCache = (() => {
-  const writeToCache = async (
+class LocalCache {
+  static EXPIRE_TIME = 5 * 60 * 1000;
+
+  async writeToCache(
     key: string,
     data: KeywordDataTypes[],
-    EXPIRE_TIME: number = 5 * 60 * 1000,
-  ) => {
+    expireTime: number = LocalCache.EXPIRE_TIME,
+  ) {
     try {
       const cache = await caches.open(cacheName);
-      const expired = new Date().getTime() + EXPIRE_TIME;
+      const expired = new Date().getTime() + expireTime;
 
       const request = new Request(key);
       const responseData = {
@@ -24,9 +26,9 @@ const localCache = (() => {
     } catch (error) {
       console.error('데이터 캐싱 중 오류가 발생했습니다:', error);
     }
-  };
+  }
 
-  const readFromCache = async (key: string) => {
+  async readFromCache(key: string) {
     try {
       const cache = await caches.open(cacheName);
       const response = await cache.match(key);
@@ -46,12 +48,8 @@ const localCache = (() => {
       console.error('캐싱 데이터를 읽는 도중 오류가 발생했습니다:', error);
       return [];
     }
-  };
+  }
+}
 
-  return {
-    writeToCache,
-    readFromCache,
-  };
-})();
-
+const localCache = new LocalCache();
 export default localCache;
