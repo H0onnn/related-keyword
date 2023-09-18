@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getKeywordData } from '../../api/data';
 import { KeywordDataTypes } from '../../constants/types';
 import { styled } from 'styled-components';
@@ -8,6 +8,7 @@ import KeywordList from './KeywordList';
 import useDebounce from '../../hooks/useDebounce';
 import localCache from '../../utils/localCache';
 import useKeyPress from '../../hooks/useKeyPress';
+import useMovingScrollToKeyboard from '../../hooks/useMovingScrollToKeyboard';
 import LoadingUI from '../UI/LoadingUI';
 
 interface ModalProps extends KeywordQueryData {
@@ -21,12 +22,11 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   const [currentItem, setCurrentItem] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const modalRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<HTMLDivElement[]>([]);
-
   const downPressed = useKeyPress('ArrowDown');
   const upPressed = useKeyPress('ArrowUp');
   const enterPressed = useKeyPress('Enter');
+
+  const [modalRef, itemRefs, movingScrollToKeyboard] = useMovingScrollToKeyboard(currentItem);
 
   const fetchKeywordData = useCallback(async () => {
     if (debouncedValue && debouncedValue.length) {
@@ -43,18 +43,6 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
     }
   }, [debouncedValue, useCache]);
 
-  const adjustScroll = () => {
-    const container = modalRef.current;
-    const selectedItem = itemRefs.current[currentItem];
-
-    if (container && selectedItem) {
-      const topPos = selectedItem.offsetTop;
-      const itemHeight = selectedItem.offsetHeight;
-
-      container.scrollTop = topPos - container.offsetHeight / 2 + itemHeight / 2;
-    }
-  };
-
   useEffect(() => {
     if (debouncedValue) {
       fetchKeywordData();
@@ -64,37 +52,8 @@ const Modal = ({ query, useCache, setQuery }: ModalProps) => {
   }, [debouncedValue]);
 
   useEffect(() => {
-    if (keywordData.length && downPressed) {
-      const nextItem = (currentItem + 1) % keywordData.length;
-      if (nextItem !== currentItem) {
-        setCurrentItem(nextItem);
-      }
-    }
-  }, [downPressed]);
-
-  useEffect(() => {
-    if (keywordData.length && upPressed) {
-      const prevItem = (currentItem - 1 + keywordData.length) % keywordData.length;
-      if (prevItem !== currentItem) {
-        setCurrentItem(prevItem);
-      }
-    }
-  }, [upPressed]);
-
-  useEffect(() => {
-    if (keywordData.length && enterPressed) {
-      const selectedKeyword = keywordData[currentItem]?.sickNm;
-
-      if (selectedKeyword) setQuery(selectedKeyword);
-      else setQuery(query);
-    }
-  }, [enterPressed]);
-
-  useEffect(() => {
-    if (keywordData.length && (downPressed || upPressed)) {
-      adjustScroll();
-    }
-  }, [downPressed, upPressed, keywordData, currentItem]);
+    movingScrollToKeyboard();
+  }, [currentItem]);
 
   return (
     <ModalContainer show={debouncedValue.trim().length > 0} ref={modalRef}>
