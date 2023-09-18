@@ -1,14 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getKeywordData } from '../../api/data';
-import { KeywordDataTypes } from '../../constants/types';
+import { useState, useEffect } from 'react';
 import { styled } from 'styled-components';
 import { colors } from '../../constants/colors';
 import { KeywordQueryData } from '../../constants/types';
 import KeywordList from './KeywordList';
-import useDebounce from '../../hooks/useDebounce';
-import localCache from '../../utils/localCache';
 import useKeyPress from '../../hooks/useKeyPress';
+import useDebounce from '../../hooks/useDebounce';
 import useMovingScrollToKeyboard from '../../hooks/useMovingScrollToKeyboard';
+import { useKeywordData } from '../../hooks/useKeywordData';
 import LoadingUI from '../UI/LoadingUI';
 
 interface ModalProps extends KeywordQueryData {
@@ -17,46 +15,17 @@ interface ModalProps extends KeywordQueryData {
 }
 
 const Modal = ({ query, useCache, setQuery }: ModalProps) => {
-  const [keywordData, setKeywordData] = useState<KeywordDataTypes[]>([]);
   const debouncedValue = useDebounce(query, DELAY_TIME);
-  const [currentItem, setCurrentItem] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const downPressed = useKeyPress('ArrowDown');
-  const upPressed = useKeyPress('ArrowUp');
-  const enterPressed = useKeyPress('Enter');
-
+  const { keywordData, isLoading } = useKeywordData(debouncedValue, useCache);
+  const currentItem = useKeyPress(keywordData, setQuery);
   const [modalRef, itemRefs, movingScrollToKeyboard] = useMovingScrollToKeyboard(currentItem);
-
-  const fetchKeywordData = useCallback(async () => {
-    if (debouncedValue && debouncedValue.length) {
-      setIsLoading(true);
-      let data = useCache ? localCache.readFromCache(debouncedValue) : null;
-
-      if (!data || !data.length) {
-        console.info('calling api');
-        data = await getKeywordData(debouncedValue, useCache);
-      }
-
-      setKeywordData(data);
-      setIsLoading(false);
-    }
-  }, [debouncedValue, useCache]);
-
-  useEffect(() => {
-    if (debouncedValue) {
-      fetchKeywordData();
-    } else {
-      setKeywordData([]);
-    }
-  }, [debouncedValue]);
 
   useEffect(() => {
     movingScrollToKeyboard();
   }, [currentItem]);
 
   return (
-    <ModalContainer show={debouncedValue.trim().length > 0} ref={modalRef}>
+    <ModalContainer $isVisible={debouncedValue.trim().length > 0} ref={modalRef}>
       <CommentBox>
         <ModalComment>추천 검색어</ModalComment>
       </CommentBox>
@@ -77,8 +46,8 @@ export default Modal;
 
 const DELAY_TIME = 400;
 
-const ModalContainer = styled.div<{ show: boolean }>`
-  display: ${props => (props.show ? 'flex' : 'none')};
+const ModalContainer = styled.div<{ $isVisible: boolean }>`
+  display: ${props => (props.$isVisible ? 'flex' : 'none')};
   flex-direction: column;
   position: absolute;
   top: calc(100% + 10px);
